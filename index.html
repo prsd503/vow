@@ -238,7 +238,8 @@
                 <button class="ad-nav-btn" id="prevGlobalAdBtn">❮ Prev</button>
                 <button class="ad-nav-btn" id="nextGlobalAdBtn">Next ❯</button>
             </div>
-            <a id="globalAdLink" href="https://wa.me/919033406816?text=Hi%20I%20want%20to%20apply%20for%20global%20ad%20in%20Owl%20Watcher" target="_blank" class="ad-link">Advertise Globally Here!</a>
+            <a id="globalAdLink" href="https://wa.me/919033406816?text=Hi%20I%20want%20to%20apply%20for%20global%20ad%20in%20Owl%20Watcher" target="_blank" class="ad-link" style="color: #120801"
+        >Advertise Globally Here!</a>
         </div>
 
         <!-- Owl Jump Game Widget placed below Global Ad page view -->
@@ -296,7 +297,7 @@
                 <button class="ad-nav-btn" id="nextAdBtn">Next ❯</button>
             </div>
 
-            <a id="localAdLink" href="#" target="_blank" class="ad-link">Contact for Posting Paid Content Here!</a>
+            <a id="localAdLink" href="#" target="_blank" class="ad-link" style="color:#000">Contact for Posting Paid Content Here!</a>
         </div>
 
         <div style="margin-top: 25px; border-top: 2px dashed #8d6e63; padding-top: 20px; display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
@@ -801,7 +802,23 @@
                     slider.innerHTML += `
                         <div class="global-ad-slide" style="width: 100%; height: 100%; flex-direction: column; align-items: center; justify-content: center;">
                             <img src="${adData.imageUrl}" style="max-height: 330px; max-width: 100%; object-fit: contain; border-radius: 10px;" alt="Global Promotion">
-                            <br><a href="${contestLink}" class="ad-link" style="font-weight: bold; color: #826565; font-size: 1.1rem; text-decoration: underline;">Try Your Luck</a>
+                            <br><a href="${contestLink}" 
+   class="ad-link" 
+   style="
+     display: inline-block;
+     padding: 10px 20px;
+     background-color: #120801;
+     color: #ffffff;
+     font-weight: bold;
+     font-size: 1.1rem;
+     text-decoration: none;
+     border-radius: 6px;
+     border: none;
+     cursor: pointer;
+     transition: background-color 0.2s ease;
+   ">
+   Contest
+</a>
                         </div>`;
                 }
             });
@@ -906,9 +923,9 @@
                     const targetId = adData.greetingId || adData.id || 'society_default';
 
                     if (isWish) {
-                        actionLinkHtml = `<br><a href="greet.html?type=wish&id=${targetId}" class="ad-link" style="font-weight: bold; color: #ff6b81; font-size: 1.1rem; text-decoration: underline;">Check Greetings!</a>`;
+                        actionLinkHtml = `<br><a href="greet.html?type=wish&id=${targetId}" class="ad-link" style="font-weight: bold; color: #ff6b81; font-size: 1.1rem;">Check Greetings!</a>`;
                     } else {
-                        actionLinkHtml = `<br><a href="greet.html?type=ad&id=${targetId}" class="ad-link" style="font-weight: bold; color: #826565; font-size: 1.1rem; text-decoration: underline;">Check Ad details</a>`;
+                        actionLinkHtml = `<br><a href="greet.html?type=ad&id=${targetId}" class="ad-link" style="font-weight: bold; color: #826565; font-size: 1.1rem;">Check Ad details</a>`;
                     }
 
                     slider.innerHTML += `
