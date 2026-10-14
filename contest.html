@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&display=swap" rel="stylesheet">
+    <title>Owl Watcher | Contest & Spin Game</title>
+    <style>
+        .main-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: #fdf6e3;
+            border-bottom: 2px solid #8d6e63;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        .nav-logo {
+            font-family: 'Caveat', cursive;
+            color: #5d4037;
+            font-size: 1.8rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .nav-links { display: flex; gap: 15px; }
+        .nav-links a { 
+            text-decoration: none; 
+            color: #5d4037; 
+            font-weight: bold; 
+            font-family: 'Caveat', cursive; 
+            font-size: 1.4rem;             
+        }
+        .menu-btn { display: none; background: #8d6e63; color: white; border: none; padding: 8px 15px; border-radius: 8px; font-family: 'Caveat', cursive; font-size: 1.1rem; }
+
+        @media (max-width: 768px) {
+            .menu-btn { display: block; }
+            .nav-links { 
+                display: none; 
+                flex-direction: column; 
+                position: absolute; 
+                top: 70px; 
+                left: 0;
+                width: 100%; 
+                background: #fdf6e3; 
+                padding: 20px; 
+                z-index: 999;
+                border-bottom: 2px solid #8d6e63;
+                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            }
+            .nav-links.active { display: flex; }
+        }
+
+        body { 
+            font-family: 'Caveat', cursive; 
+            background: #fdf6e3; 
+            color: #5d4037; 
+            text-align: center; 
+            padding: 20px; 
+            margin: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #fff8f5;
+            border: 2px dashed #8d6e63;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        .ad-preview-img {
+            max-width: 100%;
+            max-height: 250px;
+            object-fit: contain;
+            border-radius: 10px;
+            border: 1px solid #dcdde1;
+            margin-bottom: 15px;
+        }
+
+        .question-box {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            font-weight: bold;
+            color: #5d4037;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .option-btn, .action-btn {
+            background: #fdf6e3;
+            border: 2px solid #8d6e63;
+            color: #5d4037;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            font-family: 'Caveat', cursive;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .option-btn:hover, .action-btn:hover {
+            background: #8d6e63;
+            color: white;
+        }
+
+        .input-box {
+            width: 80%;
+            padding: 10px;
+            border: 2px solid #8d6e63;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            font-family: 'Caveat', cursive;
+            margin-bottom: 15px;
+            background: #fff;
+            text-align: center;
+        }
+
+        .modal { display: none; position: fixed; z-index: 10; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); }
+        .modal-content { background-color: #fff; margin: 10% auto; padding: 25px; border: 2px solid #8d6e63; width: 85%; max-width: 400px; border-radius: 20px; text-align: center; }
+        .close { color: #5d4037; float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
+        
+        .back-btn {
+            display: inline-block;
+            margin-top: 20px;
+            background: #8d6e63;
+            color: white;
+            padding: 10px 25px;
+            text-decoration: none;
+            border-radius: 10px;
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body>
+
+ <nav class="main-nav">
+    <div class="nav-logo">
+        <img src="owl.png" alt="Owl Logo" style="width: 40px; height: 40px; vertical-align: middle;">  
+        <span>Owl Watcher Contest</span>
+    </div>
+    <!-- <button class="menu-btn" id="menuToggle">☰</button>
+    <div class="nav-links" id="navLinks">
+        <a href="index.html">Home</a>
+        <a href="admin.html">Admin Portal</a>
+        <a href="guard.html">Security Guard Portal</a>
+    </div> -->
+</nav> 
+
+<div class="container">
+    <!-- <h2 style="margin-top:0; font-family: 'Caveat', cursive; font-size: 2.2rem;">Owl Watcher Contest</h2>
+-->
+    <!-- Dynamic Ad Image Container -->
+    <div id="adImageContainer">
+        <img id="linkedAdImg" src="" alt="Contest Ad" class="ad-preview-img" style="display:none;">
+    </div>
+
+    <!-- Device Verification Check Prompt (Hidden until lookup completes) -->
+    <div id="deviceCheckPrompt" style="display:none;">
+        <p style="color: #d32f2f; font-size: 1.3rem; font-weight: bold;">
+            Use Registered Device to Play this Contest. (The device with which vehicle entry is done)
+        </p>
+    </div>
+
+    <!-- Step 1: Trivia Question -->
+    <div id="contestArea">
+        <div class="question-box" id="questionText">Loading contest question...</div>
+        <div id="attemptsNotice" style="font-size: 1.1rem; color: #c0392b; margin-bottom: 10px; font-weight: bold;"></div>
+        <div class="options-grid" id="optionsContainer"></div>
+    </div>
+
+    <!-- Step 2: Society Verification Box (Hidden initially) -->
+    <div id="societySection" style="display:none;">
+        <h3 style="font-size: 1.6rem; margin-bottom: 10px;"> Correct Answer! Enter Society Name</h3>
+        <input type="text" id="societyInput" class="input-box" placeholder="e.g. Sunflower Society">
+        <br>
+        <button class="action-btn" onclick="verifySocietyAndProceed()">Verify & Enter Spin Game</button>
+        <p id="societyError" style="color: #d32f2f; font-size: 1rem; display:none;"></p>
+    </div>
+
+    <!-- Step 3: Spin Game Box (Hidden initially) -->
+    <div id="spinSection" style="display:none;">
+        <h3 style="font-size: 1.8rem; color: #27ae60;">Lucky Spin Roller 🎡</h3>
+        <div id="rollerDisplay" style="font-size: 2.5rem; font-weight: bold; background: #fdf6e3; padding: 15px; border: 2px dashed #8d6e63; border-radius: 10px; margin: 15px 0; color: #d32f2f;">
+             Ready to Spin?
+        </div>
+        <button id="spinBtn" class="action-btn" onclick="executeSpin()">SPIN NOW</button>
+        <p id="spinNotice" style="font-size: 1rem; color: #7f8c8d; margin-top: 10px;"></p>
+    </div>
+
+    <a href="index.html" class="back-btn">⬅ Back to Home</a>
+</div>
+
+<!-- Modal Popup for Win / Flat Number Registration -->
+<div id="resultModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="document.getElementById('resultModal').style.display='none'">&times;</span>
+        <h3 id="modalTitle" style="color: #27ae60; margin-top:0; font-size: 1.8rem;">You Won! </h3>
+        <div id="modalBodyContent">
+            <p style="font-family: sans-serif; font-size: 1rem; color: #2f3640;">Enter your Flat Number to register your win:</p>
+            <input type="text" id="flatNumberInput" class="input-box" placeholder="e.g. A1-101">
+            <br>
+            <button class="action-btn" onclick="submitFlatWinner()">Submit Flat Number</button>
+        </div>
+        <div id="couponDisplaySection" style="display:none;">
+            <p style="font-size: 1rem; font-family: sans-serif; color: #27ae60; font-weight: bold;">Successfully registered your flat number!</p>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { Device } from 'https://cdn.jsdelivr.net/npm/@capacitor/device@latest/+esm';
+
+    const API_BASE_URL = "https://api.owlwatcher.tech/api";
+    const NG_HEADERS = { 'ngrok-skip-browser-warning': 'true' };
+
+    // Helper function matching entry.html to ensure authorized access
+    async function getAuthHeaders() {
+        try {
+            const tokenRes = await fetch(`${API_BASE_URL}/auth/token`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', ...NG_HEADERS }
+            });
+            const tokenData = await tokenRes.json();
+            if (tokenData && tokenData.token) {
+                return {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${tokenData.token}`,
+                    ...NG_HEADERS
+                };
+            }
+        } catch (err) {
+            console.error("Failed to acquire auth token:", err);
+        }
+        return { ...NG_HEADERS };
+    }
+
+    //document.getElementById('menuToggle').addEventListener('click', function() {
+      //  document.getElementById('navLinks').classList.toggle('active');
+    //});
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const adImgUrl = urlParams.get('adImg');
+
+    if (adImgUrl) {
+        const imgEl = document.getElementById('linkedAdImg');
+        imgEl.src = decodeURIComponent(adImgUrl);
+        imgEl.style.display = 'inline-block';
+    }
+
+    let correctOptionIndex = null;
+    let validatedSocietyName = "";
+    let deviceId = "";
+    let linkedFlatNumber = "";
+    const maxAttempts = 2;
+
+    // Exact device ID lookup logic matching entry.html
+    async function getDeviceIdentifier() {
+        try {
+            const info = await Device.getId();
+            return info.identifier || info.uuid || "unknown";
+        } catch (e) {
+            let mock = localStorage.getItem('mockDeviceId') || `web-${Math.random().toString(36).substr(2, 9)}`;
+            localStorage.setItem('mockDeviceId', mock);
+            return mock;
+        }
+    }
+
+    window.onload = async function() {
+        deviceId = await getDeviceIdentifier();
+        let isRegistered = false;
+
+        if (deviceId && deviceId !== "unknown") {
+            try {
+                // Ask backend to check Firestore for this deviceId
+                const res = await fetch(`${API_BASE_URL}/verify-device/${encodeURIComponent(deviceId)}`, { headers: NG_HEADERS });
+                if (res.ok) {
+                    const result = await res.json();
+                    if (result.registered === true) {
+                        isRegistered = true;
+                    }
+                }
+            } catch (err) {
+                console.error("Error verifying device registration:", err);
+            }
+        }
+
+        // If not registered in Firestore, block the contest and show notice
+        if (!isRegistered) {
+            document.getElementById('contestArea').style.display = 'none';
+            document.getElementById('deviceCheckPrompt').style.display = 'block';
+            return;
+        }
+
+        // If registered, proceed to load the contest
+        const attemptsKey = `attempts_ad_${adImgUrl || 'default'}`;
+        const blockKey = `failed_ad_${adImgUrl || 'default'}`;
+        
+        let currentAttempts = parseInt(localStorage.getItem(attemptsKey) || "0");
+
+        if (localStorage.getItem(blockKey) || currentAttempts >= maxAttempts) {
+            document.getElementById('contestArea').innerHTML = `
+                <p style="color: #d32f2f; font-size: 1.3rem; font-weight: bold;">
+                    ⚠️ You have already used your 2 attempts for this contest.
+                </p>
+            `;
+            return;
+        }
+
+        updateAttemptsNotice(currentAttempts);
+        loadContestData();
+    };
+
+    function updateAttemptsNotice(currentAttempts) {
+        const remaining = maxAttempts - currentAttempts;
+        const noticeEl = document.getElementById('attemptsNotice');
+        noticeEl.innerText = `⚠️ You have ${remaining} attempt${remaining === 1 ? '' : 's'} left for this contest.`;
+    }
+
+    async function loadContestData() {
+        try {
+            const adsResponse = await fetch(`${API_BASE_URL}/ads/global`, { headers: NG_HEADERS });
+            if (adsResponse.ok) {
+                const globalAds = await adsResponse.json();
+                const matchedAd = globalAds.find(ad => ad.imageUrl === adImgUrl);
+
+                if (matchedAd && matchedAd.question && matchedAd.options) {
+                    setupCustomContestData(matchedAd);
+                    return;
+                }
+            }
+            setupMockContestData();
+        } catch (err) {
+            console.error("Failed to load contest data:", err);
+            setupMockContestData();
+        }
+    }
+
+    function setupCustomContestData(adData) {
+        correctOptionIndex = parseInt(adData.correctIndex, 10);
+        if (isNaN(correctOptionIndex)) correctOptionIndex = 0;
+
+        document.getElementById('questionText').innerText = adData.question;
+        const optContainer = document.getElementById('optionsContainer');
+        optContainer.innerHTML = "";
+
+        adData.options.forEach((opt, index) => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.innerText = opt;
+            btn.onclick = () => checkAnswer(index, correctOptionIndex);
+            optContainer.appendChild(btn);
+        });
+    }
+
+    function setupMockContestData() {
+        correctOptionIndex = 0;
+        document.getElementById('questionText').innerText = "Default Question: What does Owl Watcher secure?";
+        const optContainer = document.getElementById('optionsContainer');
+        optContainer.innerHTML = "";
+
+        const mockOptions = ["Vehicles & Societies", "Outer Space", "Deep Ocean", "Volcanoes"];
+        mockOptions.forEach((opt, index) => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.innerText = opt;
+            btn.onclick = () => checkAnswer(index, correctOptionIndex);
+            optContainer.appendChild(btn);
+        });
+    }
+
+    function checkAnswer(selectedIndex, correctIndex) {
+        const attemptsKey = `attempts_ad_${adImgUrl || 'default'}`;
+        const blockKey = `failed_ad_${adImgUrl || 'default'}`;
+        
+        let currentAttempts = parseInt(localStorage.getItem(attemptsKey) || "0");
+        if (currentAttempts >= maxAttempts || localStorage.getItem(blockKey)) return;
+
+        currentAttempts++;
+        localStorage.setItem(attemptsKey, currentAttempts.toString());
+
+        if (selectedIndex === correctIndex) {
+            document.getElementById('contestArea').style.display = 'none';
+            document.getElementById('societySection').style.display = 'block';
+        } else {
+            if (currentAttempts >= maxAttempts) {
+                localStorage.setItem(blockKey, "true");
+                document.getElementById('contestArea').innerHTML = `
+                    <p style="color: #d32f2f; font-size: 1.3rem; font-weight: bold;">
+                         Incorrect! You have completed your 2 attempts and are now blocked from this ad.
+                    </p>
+                `;
+            } else {
+                updateAttemptsNotice(currentAttempts);
+                alert(` Incorrect Answer! You have 1 attempt left.`);
+            }
+        }
+    }
+
+    async function verifySocietyAndProceed() {
+        const societyVal = document.getElementById('societyInput').value.trim();
+        const errEl = document.getElementById('societyError');
+        
+        if (!societyVal) {
+            errEl.innerText = "Please enter a society name.";
+            errEl.style.display = 'block';
+            return;
+        }
+
+        try {
+            const res = await fetch(`${API_BASE_URL}/societies/verify?name=${encodeURIComponent(societyVal)}`, { headers: NG_HEADERS });
+            if (res.ok) {
+                const societyData = await res.json();
+                validatedSocietyName = societyData.name || societyVal;
+
+                // Device Verification with proper auth headers and parameter name
+                const headers = await getAuthHeaders();
+                const vRes = await fetch(`${API_BASE_URL}/vehicles?societyName=${encodeURIComponent(validatedSocietyName)}`, { headers });
+                const allVehicles = await vRes.json();
+
+                const deviceRecord = Array.isArray(allVehicles) ? allVehicles.find(v => v.deviceId === deviceId) : null;
+
+                if (!deviceRecord) {
+                    errEl.innerText = "Use Registered Device to Play this Contest. (This device is not linked to any flat in this society)";
+                    errEl.style.display = 'block';
+                    return;
+                }
+
+                // Store linked flat number for later win verification
+                linkedFlatNumber = String(deviceRecord.flatNumber).trim().toUpperCase();
+
+                document.getElementById('societySection').style.display = 'none';
+                
+                const cacheKey = `spun_${adImgUrl}_${validatedSocietyName}`;
+                if (localStorage.getItem(cacheKey)) {
+                    document.getElementById('spinBtn').style.display = 'none';
+                    document.getElementById('spinNotice').innerText = "⚠️ This device has already spun for this contest!";
+                }
+
+                document.getElementById('spinSection').style.display = 'block';
+            } else {
+                errEl.innerText = "Society name not found in database. Please check spelling.";
+                errEl.style.display = 'block';
+            }
+        } catch (err) {
+            errEl.innerText = "Error verifying society. Try again.";
+            errEl.style.display = 'block';
+        }
+    }
+    window.verifySocietyAndProceed = verifySocietyAndProceed;
+
+    async function executeSpin() {
+        const cacheKey = `spun_${adImgUrl}_${validatedSocietyName}`;
+        if (localStorage.getItem(cacheKey)) {
+            alert("You have already spun for this contest!");
+            return;
+        }
+
+        const roller = document.getElementById('rollerDisplay');
+        const spinBtn = document.getElementById('spinBtn');
+        spinBtn.disabled = true;
+
+        let counter = 0;
+        const rollingInterval = setInterval(() => {
+            const randomSymbols = ["🍒", "🎰", "⭐", "🎁", "🔔", "💎"];
+            roller.innerText = randomSymbols[Math.floor(Math.random() * randomSymbols.length)];
+            counter++;
+        }, 100);
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/contest/spin`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', ...NG_HEADERS },
+                body: JSON.stringify({ societyName: validatedSocietyName })
+            });
+
+            const data = await response.json();
+
+            setTimeout(() => {
+                clearInterval(rollingInterval);
+                localStorage.setItem(cacheKey, "true");
+                spinBtn.style.display = 'none';
+
+                if (data.won) {
+                    roller.innerText = "WON!";
+                    document.getElementById('modalTitle').innerText = "You Won the Spin! ";
+                    document.getElementById('modalBodyContent').style.display = 'block';
+                    document.getElementById('couponDisplaySection').style.display = 'none';
+                    document.getElementById('resultModal').style.display = 'block';
+                } else {
+                    roller.innerText = "Better Luck Next Time!";
+                    document.getElementById('spinNotice').innerText = "Better luck next time! Spin completed.";
+                }
+            }, 2500);
+
+        } catch (err) {
+            clearInterval(rollingInterval);
+            spinBtn.disabled = false;
+            roller.innerText = "Error";
+            alert("Spin error occurred. Please try again.");
+        }
+    }
+
+    window.executeSpin = executeSpin;
+
+    async function submitFlatWinner() {
+        const flatVal = document.getElementById('flatNumberInput').value.trim().toUpperCase();
+        if (!flatVal) {
+            alert("Please enter your flat number.");
+            return;
+        }
+
+        // Verify entered flat number matches the device's registered flat
+        if (flatVal !== linkedFlatNumber) {
+            alert(`⚠️ Incorrect Flat Number. This device is registered for Flat ${linkedFlatNumber}.`);
+            return;
+        }
+
+        try {
+            const res = await fetch(`${API_BASE_URL}/contest/winner`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', ...NG_HEADERS },
+                body: JSON.stringify({
+                    societyName: validatedSocietyName,
+                    flatNumber: flatVal,
+                    winnerFlatnumber: flatVal,
+                    deviceId: deviceId
+                })
+            });
+
+            if (res.ok) {
+                document.getElementById('modalBodyContent').style.display = 'none';
+                document.getElementById('couponDisplaySection').style.display = 'block';
+            } else {
+                alert("Failed to save winner details.");
+            }
+        } catch (err) {
+            alert("Network error while saving winner info.");
+        }
+    }
+    window.submitFlatWinner = submitFlatWinner;
+</script>
+
+</body>
+</html>

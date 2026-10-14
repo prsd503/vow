@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&display=swap" rel="stylesheet">
+    <title>Owl Watcher | Admin</title>
+    <style>
+    .loading-spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(255,255,255,.3);
+        border-radius: 50%;
+        border-top-color: #fff;
+        animation: spin 1s ease-in-out infinite;
+    }
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+    button:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+        
+        /* Base Theme */
+        body { font-family: 'Caveat', cursive; background: #fdf6e3; color: #5d4037; text-align: center; padding: 20px; margin: 0; }
+        
+        /* Navigation (Unified Style) */
+        .main-nav {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+            background: #fdf6e3;
+            border-bottom: 2px solid #8d6e63;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        .nav-logo { font-family: 'Caveat', cursive; color: #5d4037; font-size: 1.5rem; font-weight: bold; margin-right: 20px; }
+        .nav-links { display: flex; gap: 15px; }
+        .nav-links a { text-decoration: none; color: #5d4037; font-weight: bold; font-family: 'Caveat', cursive; font-size: 1.3rem; }
+        
+        /* Mobile Menu Button */
+        .menu-btn { display: none; background: #8d6e63; color: white; border: none; padding: 8px 15px; border-radius: 8px; font-family: 'Caveat', cursive; font-size: 1.1rem; }
+
+        @media (max-width: 768px) {
+            .menu-btn { display: block; }
+            .nav-links { display: none; flex-direction: column; position: absolute; top: 70px; width: 100%; background: #fdf6e3; padding: 20px; z-index: 999; }
+            .nav-links.active { display: flex; }
+        }
+
+        .brown-theme {
+            background-color: #f4ece0;
+            color: #4e342e;
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px solid #8d6e63;
+        }
+        
+        #customModal { z-index: 1000; }
+        #customModal > div { border: 2px solid #8d6e63; text-align: center; }
+        .card { background: #fff; padding: 20px; border-radius: 20px; border: 2px solid #8d6e63; box-shadow: 5px 5px 0px #8d6e63; max-width: 100vw; margin: 0px 5px; margin-bottom: 25px; }
+        input, textarea, select { width: 85%; padding: 10px; border: 2px solid #8d6e63; border-radius: 10px; font-size: 1.2rem; margin-bottom: 10px; box-sizing: border-box; }
+        button { background: #8d6e63; color: white; border: none; padding: 10px 25px; border-radius: 10px; cursor: pointer; font-size: 1.2rem; margin-top: 10px; border: 2px solid #5d4037; }
+        button:hover { background: #5d4037; }
+        #admin-results { margin-top: 15px; text-align: left; }
+        .contact-btn { display: inline-block; background: #8d6e63; color: white; padding: 10px 20px; text-decoration: none; border-radius: 10px; font-size: 1rem; margin-top: 10px; border: 2px solid #5d4037; }
+        .contact-btn:hover { background: #5d4037; }
+        
+        .whatsapp-btn {
+            display: none; 
+            background: #25d366; 
+            color: white; 
+            padding: 10px 20px; 
+            text-decoration: none; 
+            border-radius: 10px; 
+            font-size: 1.1rem; 
+            margin-top: 12px; 
+            border: 2px solid #1ebe57; 
+            font-weight: bold;
+            box-sizing: border-box;
+            width: 85%;
+        }
+        .whatsapp-btn:hover { background: #1ebe57; }
+
+        /* Loading Spinner Helper */
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+
+<nav class="main-nav" style="margin-top: 50px; display: flex; justify-content: space-between; align-items: center;">
+    <div class="nav-logo" style="display: flex; align-items: center; gap: 8px;">
+        <img src="owl.png" alt="Owl Logo" style="width: 50px; height: 50px; vertical-align: middle;">  
+        <span>Owl Watcher</span>
+    </div>
+    
+    <button class="menu-btn" id="menuToggle" style="margin-left: auto;">☰</button>
+    
+    <div class="nav-links" id="navLinks">
+        <a href="index.html" style="background-color: yellow;">Home</a>
+        <a href="admin.html">Admin Portal</a>
+        <a href="guard.html">Security Guard Portal</a>
+        <a href="studio.html">Photo Studio Portal</a>
+        <a href="https://wa.me/919033406816">Contact Us</a>
+    </div>
+</nav>
+
+    <!-- Login Section -->
+    <div class="card" id="login-section">
+        <h2>Admin Login</h2>
+        <input type="email" id="email" placeholder="Email">
+        <input type="password" id="pass" placeholder="Password">
+        <br>
+        <button id="loginBtn">Login</button>
+        <br>
+        <button id="forgotPasswordBtn" style="background: transparent; color: #5d4037; border: none; text-decoration: underline; font-size: 1rem; cursor: pointer; margin-top: 5px;">Forgot Password?</button>
+    </div>
+
+    <!-- Master Admin Controls Panel -->
+    <div class="card" id="master-admin-panel" style="display:none; border-color: #d32f2f; background: #fff5f5; max-width: 440px; margin: auto; margin-bottom: 25px;">
+        <h3 style="color: #d32f2f; margin-top: 0;">👑 Master Admin Controls</h3>
+        <div style="margin-bottom: 10px; text-align: left;">
+            <label style="font-size: 0.9rem; font-weight: bold;">Switch Active Society:</label>
+            <input type="text" id="masterSocietyInput" placeholder="Enter target society name">
+            <button id="masterSaveSocietyBtn" style="background: #d32f2f; font-size: 0.9rem; padding: 6px 15px;">Update Society</button>
+        </div>
+        <div style="text-align: left;">
+            <label style="font-size: 0.9rem; font-weight: bold;">Owl Watcher Team Phone:</label>
+            <input type="text" id="masterPhoneInput" placeholder="Enter team WhatsApp number">
+            <button id="masterSavePhoneBtn" style="background: #25d366; font-size: 0.9rem; padding: 6px 15px; border-color: #1ebe57;">Save Phone</button>
+        </div>
+    </div>
+
+    <!-- Spin Statistics Widget (Visible only to MasterAdmin) -->
+    <div id="masterAdminSpinSection" style="display: none; max-width: 440px; margin: auto; margin-bottom: 25px; padding: 15px; background: #fff8f5; border: 2px dashed #8d6e63; border-radius: 20px; box-shadow: 5px 5px 0px #8d6e63;">
+        <h3 style="color: #5d4037; margin-top: 0;">Check Society Spin Counts 📊</h3>
+        <input type="text" id="adminSocietyQuery" placeholder="Enter Society Name" style="padding: 8px; font-size: 1rem; border-radius: 5px; border: 1px solid #8d6e63; width: 85%;">
+        <br>
+        <button onclick="fetchSocietySpins()" style="padding: 8px 15px; background: #8d6e63; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 1rem; margin-top: 10px;">Check Spins</button>
+        
+        <div id="spinStatsResult" style="margin-top: 15px; text-align: left; font-size: 0.95rem; color: #5d4037; line-height: 1.6;"></div>
+    </div>
+    
+    <!-- Search & Manage Section -->
+    <div class="card" id="search-section" style="display:none;">
+        <h2>Search & Manage</h2>
+        <input type="text" id="adminSearch" placeholder="Enter Vehicle Number" style="text-transform: uppercase;">
+        <br>
+        <button id="adminSearchBtn">Search</button>
+        <button id="logoutBtn" style="background:#d32f2f;">Logout</button>
+        <div id="admin-results"></div>
+    </div>
+
+    <!-- Main Data & Operations Section -->
+    <div class="card" id="data-section" style="display:none;">
+        <h2>Add/Edit Vehicle</h2>
+        <input type="text" id="vNum" placeholder="Vehicle Number" style="text-transform: uppercase;">
+        <input type="text" id="fNum" placeholder="Flat Number/Name" style="text-transform: uppercase;">
+        <select id="rType">
+            <option value="">Select Resident Type</option>
+            <option value="Owner">Owner</option>
+            <option value="Tenant">Tenant</option>
+        </select>
+        <input type="text" id="mNum" placeholder="Mobile Number">
+        <select id="vType">
+            <option value="2-Wheeler">2-Wheeler</option>
+            <option value="3-Wheeler">3-Wheeler</option>
+            <option value="4-Wheeler">4-Wheeler</option>
+        </select>
+        <br>
+        <button id="saveBtn">Add/Edit Vehicle Registry</button>
+
+        <hr style="margin:20px 0;">
+
+        <div class="card" style="border-style: dashed;">
+            <h2>📢 Notice Board</h2>
+            <br>
+            <label>Today's Notice:</label>
+            <br>
+            <textarea id="todayMsg" placeholder="Visible now..." rows="3"></textarea>
+            <br>
+            <label>Tomorrow's Notice:</label>
+            <br>
+            <textarea id="tomorrowMsg" placeholder="Set for tomorrow..." rows="3"></textarea>
+            <p style="font-size: 10px; color: #888; margin-top: 10px;">
+                ⚠️ Disclaimer: Publicly visible. Do not upload personal data.
+            </p>
+            <button id="postNoticeBtn">Update Notices</button>
+            <button id="deleteNoticeBtn" style="background: #d32f2f;">Clear All Notices</button>
+        </div>
+
+        <div class="card">
+            <h2>Manage Security Guards</h2>
+            <input type="text" id="searchGuardName" placeholder="Search by Name...">
+            <br>
+            <button id="searchGuardBtn" style="background: #5d4037;">Search</button>
+            <br>
+            <input type="email" id="gEmail" placeholder="Guard Email (ID)">
+            <input type="text" id="gName" placeholder="Guard Full Name">
+            <input type="text" id="gPhone" placeholder="Guard Mobile Number">
+            <div style="display: flex; gap: 5px;">
+                <button id="addGuardBtn" style="flex:1;">Add/Update Guard</button>
+                <button id="deleteGuardBtn" style="flex:1; background: #d32f2f;">Delete</button>
+            </div>
+        </div>
+
+        <!-- FACILITY MANAGEMENT SECTION -->
+        <hr style="margin:20px 0;">
+        <div class="card" style="border-color: #8d6e63; background-color: #f9f5f0;">
+            <h2>🏢 Configure Facility Names (F1-F5)</h2>
+            <input type="text" id="name_F1" placeholder="Name for F1 (e.g. Hall 1)">
+            <input type="text" id="name_F2" placeholder="Name for F2 (e.g. Badminton Court)">
+            <input type="text" id="name_F3" placeholder="Name for F3 (e.g. Gym)">
+            <input type="text" id="name_F4" placeholder="Name for F4 (e.g. Swimming Pool)">
+            <input type="text" id="name_F5" placeholder="Name for F5 (e.g. Club House)">
+            <button id="saveAllFacilityNamesBtn" style="background: #8d6e63; width: 100%;">Save All Names</button>
+        </div>
+        
+        <!-- BOOKING SECTION -->
+        <div class="booking-section">
+            <h3>Book Facility</h3>
+            <select id="facilitySelect"></select>
+            <input type="date" id="bookingDate">
+            <div id="bookingTimeContainer" style="margin: 10px 0;"></div>
+            <button id="bookFacilityBtn">Confirm Booking</button>
+        </div>
+        <p style="font-size: 0.85rem; color: #666;">⚠️ Disclaimer: Automatically deletes bookings older than 7 days and bookings allowed to show till next 6 months only.</p>
+
+        <div id="active-bookings-list" style="margin-top: 20px; text-align: left;"></div>
+        
+        <hr style="margin:20px 0;">
+        <h3>Bulk Vehicle Management</h3>
+        <input type="file" id="excelInput">
+        <br>
+        <button id="downloadTemplateBtn">Download CSV Template</button>
+        <button id="importBtn">Bulk Import CSV File</button>
+        
+        <div id="bulk-section" style="display: none; margin-top: 15px;">
+            <button id="bulkDeleteBtn" style="background: #d32f2f;">Bulk Delete</button>
+            <button id="exportBtn">Export All Data</button>
+            
+            <hr style="margin:20px 0;">
+            <h2>🚗 Vehicle Allowance Limits</h2>
+            <label style="font-size: 0.9rem; font-weight: bold; display: block; text-align: left; margin-left: 7.5%;">Max 4-Wheelers Per Flat:</label>
+            <input type="number" id="max4WheelerInput" placeholder="e.g. 1" min="0">
+            
+            <label style="font-size: 0.9rem; font-weight: bold; display: block; text-align: left; margin-left: 7.5%;">Max 2-Wheelers Per Flat:</label>
+            <input type="number" id="max2WheelerInput" placeholder="e.g. 2" min="0">
+            
+            <button id="saveSocietyLimitsBtn" style="background: #8d6e63; width: 85%;">Save Vehicle Limits</button>
+
+            <hr style="margin:20px 0;">
+            <h2>🏠 Manage Flat Numbers List</h2>
+            <p style="font-size: 0.85rem; color: #666; margin-top: -5px;">Enter flat numbers separated by commas (e.g. A1-101, A1-102, B1-101)</p>
+            <textarea id="flatsInput" placeholder="A1-101, A1-102, B1-101..." rows="3"></textarea>
+            <button id="saveFlatsBtn" style="background: #8d6e63; width: 100%;">Save Flat Numbers</button>
+        </div>
+        
+        <hr style="margin:20px 0;">
+        <div>
+            <a href="deletedata.html" class="contact-btn" target="_blank">Bulk Data Delete</a>
+            <a href="delete.html" class="contact-btn" target="_blank">Delete Full Account</a>
+        </div>
+    </div>
+
+    <!-- Modal Dialog -->
+    <div id="customModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5);">
+        <div style="background:white; margin: 20% auto; padding:20px; width:80%; max-width:300px; border-radius:20px;">
+            <p id="modalMessage"></p>
+            <button onclick="closeModal()">Close</button>
+            <button id="confirmDeleteBtn" onclick="window.confirmDelete()" style="display:none; background:#d32f2f; color:white;">Confirm Delete</button>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('menuToggle').addEventListener('click', function() {
+            document.getElementById('navLinks').classList.toggle('active');
+        });
+        
+        if (localStorage.getItem("adminLoggedIn") === "true") {
+            document.getElementById("login-section").style.display = "none";
+            document.getElementById("search-section").style.display = "block";
+            document.getElementById("data-section").style.display = "block";
+        }
+
+        window.addEventListener("DOMContentLoaded", () => {
+            document.getElementById("logoutBtn")?.addEventListener("click", () => {
+                localStorage.removeItem("adminLoggedIn");
+                localStorage.removeItem("isAdminMaster");
+                document.getElementById("login-section").style.display = "block";
+                document.getElementById("search-section").style.display = "none";
+                document.getElementById("data-section").style.display = "none";
+                const masterPanel = document.getElementById("master-admin-panel");
+                if (masterPanel) masterPanel.style.display = "none";
+                const spinSection = document.getElementById("masterAdminSpinSection");
+                if (spinSection) spinSection.style.display = "none";
+            });
+        });
+
+        function closeModal() { document.getElementById('customModal').style.display='none'; }
+
+        // Global function for MasterAdmin spin query lookup with winner flat support
+        async function fetchSocietySpins() {
+            const societyName = document.getElementById('adminSocietyQuery').value.trim();
+            const resultDiv = document.getElementById('spinStatsResult');
+            
+            if (!societyName) {
+                resultDiv.innerText = "Please enter a society name.";
+                return;
+            }
+
+            resultDiv.innerHTML = "Fetching stats...";
+
+            try {
+                const res = await fetch(`https://api.owlwatcher.tech/api/contest/spinstats?societyName=${encodeURIComponent(societyName)}`, {
+                    headers: { 'ngrok-skip-browser-warning': 'true' }
+                });
+                
+                if (res.ok) {
+                    const data = await res.json();
+                    
+                    const lifetime = data.totalSpins !== undefined ? data.totalSpins : (data.totalLifetimeSpins || 0);
+                    const daily = data.totalDaySpins !== undefined ? data.totalDaySpins : 0;
+                    const monthly = data.totalMonthSpins !== undefined ? data.totalMonthSpins : 0;
+                    const winnerFlat = data.winnerFlat || "None yet";
+                    
+                    resultDiv.innerHTML = `
+                        🏢 <b>Society:</b> ${data.societyName || societyName}<br>
+                        🏆 <b>Latest Winner Flat:</b> <span style="color:#2e7d32; font-weight:bold;">${winnerFlat}</span><br>
+                        ♾️ <b>Total Lifetime Spins:</b> <span style="color:#d32f2f;">${lifetime}</span><br>
+                        📅 <b>Spins Today:</b> <span style="color:#d32f2f;">${daily}</span><br>
+                        🗓️ <b>Spins This Month:</b> <span style="color:#d32f2f;">${monthly}</span>
+                    `;
+                } else {
+                    resultDiv.innerText = "Society data not found or invalid response.";
+                }
+            } catch (err) {
+                console.error("Spin Stats Error:", err);
+                resultDiv.innerText = "Error fetching statistics.";
+            }
+        }
+    </script>
+
+    <script type="module" src="admin-logic.js"></script>
+
+    <!-- Interactive Owl Audio Easter Egg -->
+    <div id="owl-container">
+        <div id="owl-icon" onclick="activateOwlEffect()">
+            <img src="owl.png" alt="Owl Icon" style="width: 55px; height: 55px; object-fit: contain;">
+        </div>
+        <audio id="owl-audio" src="theme.mp3" preload="auto"></audio>
+    </div>
+
+    <style>
+      #owl-container { position: fixed; bottom: 30px; right: 30px; z-index: 9999; }
+      #owl-icon { font-size: 60px; cursor: pointer; user-select: none; transition: transform 0.3s ease; filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.2)); }
+      #owl-icon:hover { transform: scale(1.15); }
+      @keyframes enlargeAndShrinkTwice {
+        0% { transform: scale(1); }
+        25% { transform: scale(1.6); }
+        50% { transform: scale(1); }
+        75% { transform: scale(1.6); }
+        100% { transform: scale(1); }
+      }
+      .active-effect { animation: enlargeAndShrinkTwice 2s ease-in-out forwards; }
+    </style>
+
+    <script>
+      function activateOwlEffect() {
+        const container = document.getElementById('owl-container');
+        const audio = document.getElementById('owl-audio');
+        if (container.classList.contains('active-effect')) return;
+        audio.currentTime = 0;
+        audio.play().catch(error => { console.log("Audio playback blocked or file not found:", error); });
+        container.classList.add('active-effect');
+        setTimeout(() => { container.classList.remove('active-effect'); }, 2000);
+      }
+    </script>
+    <!-- Capacitor Bridge -->
+    <script src="capacitor.js"></script>
+</body>
+</html>

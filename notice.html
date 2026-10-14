@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Lexend:wght@300;400;500&display=swap" rel="stylesheet">
+    <title>Owl Watcher | Notice Details</title>
+    <style>
+        /* Base Theme */
+        body { font-family: 'Caveat', cursive; background: #fdf6e3; color: #5d4037; text-align: center; padding: 20px; margin: 0; }
+        
+        /* Navigation (Unified Style) */
+        .main-nav {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+            background: #fdf6e3;
+            border-bottom: 2px solid #8d6e63;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        .nav-logo { font-family: 'Caveat', cursive; color: #5d4037; font-size: 1.5rem; font-weight: bold; margin-right: 20px; display: flex; align-items: center; gap: 8px; }
+        .nav-links { display: flex; gap: 15px; }
+        .nav-links a { text-decoration: none; color: #5d4037; font-weight: bold; font-family: 'Caveat', cursive; font-size: 1.3rem; }
+        
+        /* Mobile Menu Button */
+        .menu-btn { display: none; background: #8d6e63; color: white; border: none; padding: 8px 15px; border-radius: 8px; font-family: 'Caveat', cursive; font-size: 1.1rem; }
+
+        @media (max-width: 768px) {
+            .menu-btn { display: block; }
+            .nav-links { display: none; flex-direction: column; position: absolute; top: 70px; width: 100%; background: #fdf6e3; padding: 20px; z-index: 999; box-sizing: border-box; border-bottom: 2px solid #8d6e63; left: 0; }
+            .nav-links.active { display: flex; }
+        }
+
+        .card { background: #fff; padding: 30px 20px; border-radius: 20px; border: 2px solid #8d6e63; box-shadow: 5px 5px 0px #8d6e63; max-width: 100vw; margin: 0 5px; text-align: left; }
+        h1 { text-align: center; margin-top: 0; }
+        h3 { border-bottom: 2px solid #8d6e63; padding-bottom: 5px; }
+        .notice-date { font-size: 0.8rem; color: #7f8c8d; text-transform: uppercase; letter-spacing: 1px; font-family: sans-serif; margin-bottom: 15px; display: block; }
+        .full-content { font-family: 'Lexend', sans-serif; font-size: 1rem; line-height: 1.65; color: #5d4037; overflow-wrap: break-word; word-wrap: break-word; word-break: break-word; white-space: pre-wrap; background: #fdf6e3; padding: 20px; border-radius: 10px; border-left: 5px solid #8d6e63; border: 1px solid #f3e9d2; }
+        .btn-container { text-align: center; margin-top: 30px; border-top: 1px solid #dcdde1; padding-top: 15px; }
+        .back-btn { background: #8d6e63; color: white; border: none; padding: 10px 25px; border-radius: 10px; cursor: pointer; font-size: 1.2rem; width: 85%; font-family: 'Caveat', cursive; text-decoration: none; display: inline-block; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <!-- Unified Navigation Bar -->
+    <nav class="main-nav" style="margin-top: 20px;">
+        <div class="nav-logo">
+            <img src="owl.png" alt="Owl Logo" style="width: 50px; height: 50px; vertical-align: middle;">  
+            <span>Owl Watcher</span>
+        </div>
+        
+        <button class="menu-btn" id="menuToggle" style="margin-left: auto;">☰</button>
+        
+        <div class="nav-links" id="navLinks">
+            <a href="index.html">Home</a>
+            <a href="admin.html">Admin Portal</a>
+            <a href="guard.html">Security Guard Portal</a>
+            <a href="studio.html">Photo Studio Portal</a>
+            <a href="https://wa.me/919033406816">Contact Us</a>
+        </div>
+    </nav>
+
+    <div class="card">
+        <h3>📢 Full Notice</h3>
+        <span id="notice-date" class="notice-date">Loading date...</span>
+        <div id="notice-full-content" class="full-content">Loading content...</div>
+        
+        <div class="btn-container">
+            <a href="index.html" class="back-btn">Back</a>
+        </div>
+    </div>
+
+    <script>
+        // Toggle mobile dropdown menu
+        document.getElementById('menuToggle').addEventListener('click', function() {
+            document.getElementById('navLinks').classList.toggle('active');
+        });
+
+        const API_BASE_URL = 'https://api.owlwatcher.tech/api';
+        const NG_HEADERS = { 'ngrok-skip-browser-warning': 'true' };
+
+        async function getAppCheckHeaders() {
+            let appCheckToken = "";
+            if (typeof firebase !== 'undefined' && firebase.appCheck) {
+                try {
+                    const appCheckResponse = await firebase.appCheck().getToken(false);
+                    appCheckToken = appCheckResponse.token;
+                } catch (err) {
+                    console.error("Failed to get Firebase App Check token:", err);
+                }
+            }
+            return { 'X-Firebase-AppCheck': appCheckToken };
+        }
+
+        async function getAuthHeaders() {
+            try {
+                const tokenResponse = await fetch(`${API_BASE_URL}/auth/token`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', ...NG_HEADERS }
+                });
+                if (tokenResponse.ok) {
+                    const tokenData = await tokenResponse.json();
+                    if (tokenData && tokenData.token) {
+                        const appCheckHeaders = await getAppCheckHeaders();
+                        return {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${tokenData.token}`,
+                            ...appCheckHeaders,
+                            ...NG_HEADERS
+                        };
+                    }
+                }
+            } catch (err) {
+                console.error("Failed to acquire auth token:", err);
+            }
+
+            const fallbackAppCheck = await getAppCheckHeaders();
+            return {
+                'Content-Type': 'application/json',
+                ...fallbackAppCheck,
+                ...NG_HEADERS
+            };
+        }
+
+        async function loadFullNotice() {
+            // Parse URL parameters to retrieve societyId
+            const urlParams = new URLSearchParams(window.location.search);
+            const societyId = urlParams.get('id');
+            
+            const contentDiv = document.getElementById('notice-full-content');
+            const dateSpan = document.getElementById('notice-date');
+
+            if (!societyId) {
+                contentDiv.innerText = "Error: Invalid notice resource reference.";
+                dateSpan.innerText = "";
+                return;
+            }
+
+            try {
+                const headers = await getAuthHeaders();
+                const response = await fetch(`${API_BASE_URL}/notices/${encodeURIComponent(societyId)}`, { headers });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data && data.todayMessage) {
+                        contentDiv.innerText = data.todayMessage;
+                        if (data.date) {
+                            dateSpan.innerText = data.date;
+                        } else {
+                            dateSpan.innerText = new Date().toLocaleDateString('en-CA');
+                        }
+                    } else {
+                        contentDiv.innerText = "No active notices for today.";
+                        dateSpan.innerText = "";
+                    }
+                } else if (response.status === 404) {
+                    contentDiv.innerText = "Notice record could not be found.";
+                    dateSpan.innerText = "";
+                } else {
+                    contentDiv.innerText = "Failed to load notice from server.";
+                    dateSpan.innerText = "";
+                }
+            } catch (error) {
+                console.error("Error reading notice archive via API:", error);
+                contentDiv.innerText = "An unexpected error occurred while fetching notice.";
+            }
+        }
+
+        window.addEventListener("DOMContentLoaded", loadFullNotice);
+    </script>
+
+    <div id="owl-container">
+        <div id="owl-icon" onclick="activateOwlEffect()">
+            <img src="owl.png" alt="Owl Icon" style="width: 55px; height: 55px; object-fit: contain;">
+        </div>
+        <audio id="owl-audio" src="theme.mp3" preload="auto"></audio>
+    </div>
+
+    <style>
+      #owl-container {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        z-index: 9999;
+      }
+
+      #owl-icon {
+        font-size: 60px;
+        cursor: pointer;
+        user-select: none;
+        transition: transform 0.3s ease;
+        filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.2));
+      }
+
+      #owl-icon:hover {
+        transform: scale(1.15);
+      }
+
+      @keyframes enlargeAndShrinkTwice {
+        0% { transform: scale(1); }
+        25% { transform: scale(1.6); }
+        50% { transform: scale(1); }
+        75% { transform: scale(1.6); }
+        100% { transform: scale(1); }
+      }
+
+      .active-effect {
+        animation: enlargeAndShrinkTwice 2s ease-in-out forwards;
+      }
+    </style>
+
+    <script>
+      function activateOwlEffect() {
+        const container = document.getElementById('owl-container');
+        const audio = document.getElementById('owl-audio');
+
+        if (container.classList.contains('active-effect')) return;
+
+        audio.currentTime = 0;
+        audio.play().catch(error => {
+          console.log("Audio playback blocked or file not found:", error);
+        });
+
+        container.classList.add('active-effect');
+
+        setTimeout(() => {
+          container.classList.remove('active-effect');
+        }, 2000);
+      }
+    </script>
+    
+</body>
+</html>

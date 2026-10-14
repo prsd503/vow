@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&display=swap" rel="stylesheet">
+    <title>Owl Watcher | Add Vehicle</title>
+    <style>
+        body { font-family: 'Caveat', cursive; background: #fdf6e3; color: #5d4037; text-align: center; padding: 20px; }
+        .card { max-width: 450px; margin: 40px auto; background: #ffffff; padding: 30px; border: 2px solid #8d6e63; border-radius: 20px; box-shadow: 4px 4px 0px #5d4037; }
+        
+        input, select { width: 85%; padding: 10px; border: 2px solid #8d6e63; border-radius: 10px; font-size: 1.2rem; margin-bottom: 15px; font-family: 'Caveat', cursive; background: #fff; box-sizing: border-box; }
+        
+        .sans-input {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+        }
+
+        button { background: #8d6e63; color: white; border: none; padding: 10px 25px; border-radius: 10px; cursor: pointer; font-size: 1.3rem; font-family: 'Caveat', cursive; box-shadow: 2px 2px 0px #5d4037; }
+        button:disabled { background: #ccc; cursor: not-allowed; box-shadow: none; }
+
+        .modal { display: none; position: fixed; z-index: 10; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); }
+        .modal-content { background-color: #fff; margin: 15% auto; padding: 20px; border: 2px solid #8d6e63; width: 80%; max-width: 320px; border-radius: 20px; font-family: system-ui, -apple-system, sans-serif; text-align: center; }
+        .close { color: #5d4037; float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
+        .back-link { display: inline-block; margin-top: 15px; color: #8d6e63; text-decoration: underline; font-size: 1.2rem; }
+        .section-title { font-size: 1.1rem; font-weight: bold; margin-top: 10px; margin-bottom: 5px; color: #4e342e; text-align: left; margin-left: 7.5%; font-family: system-ui, -apple-system, sans-serif; }
+
+        .admin-note-box {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-size: 0.9rem;
+            color: #555;
+            background: #f9f6f0;
+            border: 1px dashed #8d6e63;
+            border-radius: 10px;
+            padding: 12px;
+            margin: 20px auto 10px auto;
+            width: 85%;
+            box-sizing: border-box;
+            text-align: left;
+            line-height: 1.4;
+        }
+        .whatsapp-contact-btn {
+            display: inline-block;
+            margin-top: 8px;
+            background-color: #25d366;
+            color: white;
+            text-decoration: none;
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 0.85rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h1>            <div class="nav-logo">
+<!-- <img src="owl.png" alt="Owl Logo" style="width: 40px; height: 40px; object-fit: contain;"> -->
+            Owl Watcher
+</div><p>Add Vehicle Entry 🚗</h1>
+        <p>Society: <b id="societyNameLabel">Loading...</b></p>
+        
+        <form id="vehicleForm">
+            <!-- Flat Select Dropdown -->
+            <select id="flatSelect" class="sans-input" required>
+                <option value="">Select Flat Number/Name</option>
+            </select>
+
+            <!-- Resident Type Dropdown (Owner / Tenant) -->
+            <select id="residentTypeSelect" class="sans-input" required>
+                <option value="">Select Resident Type</option>
+                <option value="Owner">Owner</option>
+                <option value="Tenant">Tenant</option>
+            </select>
+
+            <div style="width: 85%; margin: 0 auto;">
+                <input type="text" id="mobileNumber" placeholder="Mobile Number (10 digits)" maxlength="10" required class="sans-input" style="width: 100%; font-size: 1rem; padding: 10px; border: 2px solid #8d6e63; border-radius: 10px; box-sizing: border-box; margin-bottom: 15px;">
+
+                <!-- Dynamic Container for Allowed Vehicle Input Fields -->
+                <div id="dynamicVehicleFields" style="text-align: left;"></div>
+            </div>
+
+            <button type="submit" id="submitBtn" style="display:none; margin-top: 15px;">Submit Entry</button>
+            <p id="restrictionNote" style="font-family: sans-serif; font-size: 0.9rem; color: #d32f2f; margin-top: 15px; display: none;"></p>
+        </form>
+
+        <!-- Informational Note with WhatsApp Contact Link -->
+        <div class="admin-note-box">
+            ⚠️ <b>Note:</b> If details need to be edited, kindly contact the society admin. If a tenant or owner has changed, kindly inform the society admin as well by clicking the contact button below.<br>
+            <a id="adminWhatsAppLink" href="https://wa.me/919033406816" target="_blank" class="whatsapp-contact-btn">💬 Contact Admin on WhatsApp</a>
+        </div>
+
+        <a href="index.html" class="back-link">Back to Home</a>
+    </div>
+
+    <div id="resultModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="document.getElementById('resultModal').style.display='none'">&times;</span>
+            <div id="modalMessage" style="margin-top: 10px;"></div>
+            <button onclick="document.getElementById('resultModal').style.display='none'" style="margin-top: 20px; font-size: 1rem;">OK</button>
+        </div>
+    </div>
+
+    <!-- Integrated API and Modular Entry Logic -->
+    <script type="module">
+        import { Device } from 'https://cdn.jsdelivr.net/npm/@capacitor/device@latest/+esm';
+
+        const API_BASE_URL = "https://api.owlwatcher.tech/api";
+        const NG_HEADERS = { 'ngrok-skip-browser-warning': 'true' };
+
+        // Helper function to dynamically fetch a fresh short-lived auth token
+        async function getAuthHeaders() {
+            try {
+                const tokenRes = await fetch(`${API_BASE_URL}/auth/token`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', ...NG_HEADERS }
+                });
+                const tokenData = await tokenRes.json();
+                if (tokenData && tokenData.token) {
+                    return {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${tokenData.token}`,
+                        ...NG_HEADERS
+                    };
+                }
+            } catch (err) {
+                console.error("Failed to acquire auth token:", err);
+            }
+            return { ...NG_HEADERS };
+        }
+
+        const modal = document.getElementById("resultModal");
+        function showModal(msg) {
+            document.getElementById("modalMessage").innerHTML = msg;
+            modal.style.display = "block";
+        }
+        window.onclick = (e) => { if (e.target == modal) modal.style.display = "none"; };
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const societyName = urlParams.get('societyId') || urlParams.get('society') || localStorage.getItem('selectedSociety') || 'Aangan';
+
+            let deviceId = "";
+            try {
+                const info = await Device.getId();
+                deviceId = info.identifier || info.uuid || "unknown";
+            } catch (e) {
+                deviceId = localStorage.getItem('mockDeviceId') || `web-${Math.random().toString(36).substr(2, 9)}`;
+                localStorage.setItem('mockDeviceId', deviceId);
+            }
+
+            const societyLabel = document.getElementById('societyNameLabel');
+            if (societyLabel) {
+                societyLabel.innerText = societyName;
+            }
+
+            let currentSocietyData = null;
+
+            try {
+                const headers = await getAuthHeaders();
+                const response = await fetch(`${API_BASE_URL}/societies`, { headers });
+                const societies = await response.json();
+                if (Array.isArray(societies)) {
+                    currentSocietyData = societies.find(s => 
+                        (s.id && s.id.toLowerCase() === societyName.toLowerCase()) || 
+                        (s.name && s.name.toLowerCase() === societyName.toLowerCase())
+                    );
+                }
+                
+                if (currentSocietyData && currentSocietyData.flatList) {
+                    const flatSelect = document.getElementById('flatSelect');
+                    if (flatSelect) {
+                        flatSelect.innerHTML = '<option value="">Select Flat Number/Name</option>';
+                        currentSocietyData.flatList.forEach(flat => {
+                            flatSelect.innerHTML += `<option value="${flat}">${flat}</option>`;
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error("Error fetching society data from server:", error);
+            }
+
+            const flatSelect = document.getElementById('flatSelect');
+            const dynamicContainer = document.getElementById('dynamicVehicleFields');
+            const submitBtn = document.getElementById('submitBtn');
+            const mobileInput = document.getElementById('mobileNumber');
+            const residentTypeSelect = document.getElementById('residentTypeSelect');
+            const restrictionNote = document.getElementById('restrictionNote');
+
+            mobileInput.addEventListener('input', (e) => {
+                e.target.value = e.target.value.replace(/[^0-9]/g, '').slice(0, 10);
+            });
+
+            if (flatSelect) {
+                flatSelect.addEventListener('change', async () => {
+                    const selectedFlat = flatSelect.value;
+                    
+                    dynamicContainer.innerHTML = '';
+                    restrictionNote.style.display = 'none';
+                    submitBtn.style.display = 'none';
+                    mobileInput.value = '';
+                    residentTypeSelect.value = '';
+
+                    if (!selectedFlat) return;
+
+                    try {
+                        const headers = await getAuthHeaders();
+                        const res = await fetch(`${API_BASE_URL}/vehicles?society=${encodeURIComponent(societyName)}`, { headers });
+                        const allVehiclesResponse = await res.json();
+                        
+                        const allVehicles = Array.isArray(allVehiclesResponse) ? allVehiclesResponse : [];
+                        const existingVehicles = allVehicles.filter(v => String(v.flatNumber).trim() === String(selectedFlat).trim());
+
+                        // 1. Device-to-Flat Lock Check (Global across society)
+                        // Checks if this physical device is already tied to a DIFFERENT flat
+                        const deviceLinkedRecord = allVehicles.find(v => v.deviceId === deviceId);
+                        if (deviceLinkedRecord && String(deviceLinkedRecord.flatNumber).trim() !== String(selectedFlat).trim()) {
+                            restrictionNote.style.display = 'block';
+                            restrictionNote.innerText = `⚠️ This device is already linked to Flat ${deviceLinkedRecord.flatNumber}. You are not allowed to register vehicles for other flats.`;
+                            restrictionNote.style.color = '#d32f2f';
+                            submitBtn.style.display = 'none';
+                            dynamicContainer.innerHTML = '';
+                            return;
+                        }
+
+                        // 2. Flat-to-Device Lock Check (Specific to selected flat)
+                        // Checks if this flat is already tied to a DIFFERENT physical device
+                        const registeredDevice = existingVehicles.find(v => v.deviceId)?.deviceId;
+                        if (registeredDevice && registeredDevice !== deviceId) {
+                            restrictionNote.style.display = 'block';
+                            restrictionNote.innerText = `⚠️ This flat is linked to another device. Entries can only be made from the registered device.`;
+                            restrictionNote.style.color = '#d32f2f';
+                            submitBtn.style.display = 'none';
+                            dynamicContainer.innerHTML = '';
+                            return;
+                        }
+
+                        const max2W = currentSocietyData ? (currentSocietyData.max2Wheeler || 0) : 0;
+                        const max4W = currentSocietyData ? (currentSocietyData.max4Wheeler || 0) : 0;
+                        const totalAllowed = max2W + max4W;
+
+                        let registered2W = existingVehicles.filter(v => v.vehicleType === '2-Wheeler');
+                        let registered4W = existingVehicles.filter(v => v.vehicleType === '4-Wheeler');
+                        let totalRegisteredCount = existingVehicles.length;
+
+                        if (existingVehicles.length > 0) {
+                            mobileInput.value = existingVehicles[0].mobileNumber || '';
+                            residentTypeSelect.value = existingVehicles[0].residentType || '';
+                        }
+
+                        let fieldsHTML = '';
+
+                        if (totalRegisteredCount > 0) {
+                            fieldsHTML += `<div style="background: #f4ede2; padding: 10px; border-radius: 8px; margin-bottom: 10px;">
+                                <b>Already Registered Vehicles (${totalRegisteredCount}/${totalAllowed}):</b>`;
+                            existingVehicles.forEach(v => {
+                                fieldsHTML += `<div style="font-size: 0.95rem; font-family: system-ui;">• ${v.vehicleNumber} (${v.vehicleType})</div>`;
+                            });
+                            fieldsHTML += `</div>`;
+                        }
+
+                        const remaining2W = Math.max(0, max2W - registered2W.length);
+                        const remaining4W = Math.max(0, max4W - registered4W.length);
+                        const totalRemaining = remaining2W + remaining4W;
+
+                        if (totalRemaining > 0) {
+                            restrictionNote.style.display = 'block';
+                            restrictionNote.innerText = `ℹ️ ${totalRegisteredCount} filled, ${totalRemaining} remaining to fill.`;
+                            restrictionNote.style.color = '#d97706';
+
+                            for (let i = 1; i <= remaining2W; i++) {
+                                fieldsHTML += `
+                                    <div class="section-title">2-Wheeler Number (Remaining #${i})</div>
+                                    <input type="text" class="vehicle-input sans-input dynamic-vehicle-input" data-type="2-Wheeler" placeholder="10 chars e.g. GJ01AB1234" maxlength="10" style="width: 100%; font-size: 1rem; padding: 10px; border: 2px solid #8d6e63; border-radius: 10px; box-sizing: border-box; margin-bottom: 10px; text-transform: uppercase;">
+                                `;
+                            }
+
+                            for (let i = 1; i <= remaining4W; i++) {
+                                fieldsHTML += `
+                                    <div class="section-title">4-Wheeler Number (Remaining #${i})</div>
+                                    <input type="text" class="vehicle-input sans-input dynamic-vehicle-input" data-type="4-Wheeler" placeholder="10 chars e.g. GJ01AB1234" maxlength="10" style="width: 100%; font-size: 1rem; padding: 10px; border: 2px solid #8d6e63; border-radius: 10px; box-sizing: border-box; margin-bottom: 10px; text-transform: uppercase;">
+                                `;
+                            }
+
+                            submitBtn.style.display = 'inline-block';
+                        } else {
+                            restrictionNote.style.display = 'block';
+                            restrictionNote.innerText = `✅ All allowed vehicles (${totalAllowed}/${totalAllowed}) have been filled for this flat.`;
+                            restrictionNote.style.color = '#27ae60';
+                            submitBtn.style.display = 'none';
+                        }
+
+                        dynamicContainer.innerHTML = fieldsHTML;
+
+                        document.querySelectorAll('.dynamic-vehicle-input').forEach(input => {
+                            input.addEventListener("input", (event) => {
+                                event.target.value = event.target.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase().slice(0, 10);
+                            });
+                        });
+
+                    } catch (err) {
+                        console.error("Error loading flat vehicle records:", err);
+                    }
+                });
+            }
+
+            const vehicleForm = document.getElementById('vehicleForm');
+            if (vehicleForm) {
+                vehicleForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const flatNumber = flatSelect.value;
+                    const residentType = residentTypeSelect.value;
+                    const mobileNumber = mobileInput.value.trim();
+                    const vehicleInputs = document.querySelectorAll('.dynamic-vehicle-input');
+
+                    if (mobileNumber.length !== 10) {
+                        showModal("⚠️ Mobile number must be exactly 10 digits.");
+                        return;
+                    }
+
+                    let vehiclesToSubmit = [];
+                    let isValid = true;
+
+                    vehicleInputs.forEach(input => {
+                        const val = input.value.trim();
+                        if (val) {
+                            if (val.length !== 10) {
+                                isValid = false;
+                            } else {
+                                vehiclesToSubmit.push({
+                                    vehicleNumber: val,
+                                    vehicleType: input.dataset.type
+                                });
+                            }
+                        }
+                    });
+
+                    if (!isValid) {
+                        showModal("⚠️ Any entered vehicle number must be exactly 10 characters long.");
+                        return;
+                    }
+
+                    if (vehiclesToSubmit.length === 0) {
+                        showModal("⚠️ Please fill at least one vehicle number.");
+                        return;
+                    }
+
+                    submitBtn.disabled = true;
+                    submitBtn.innerText = "Checking duplicates...";
+
+                    try {
+                        const headers = await getAuthHeaders();
+                        const res = await fetch(`${API_BASE_URL}/vehicles?society=${encodeURIComponent(societyName)}`, { headers });
+                        const allVehiclesResponse = await res.json();
+                        const allVehicles = Array.isArray(allVehiclesResponse) ? allVehiclesResponse : [];
+
+                        let duplicateFound = null;
+                        for (const subVehicle of vehiclesToSubmit) {
+                            const foundMatch = allVehicles.find(v => 
+                                String(v.vehicleNumber).trim().toUpperCase() === subVehicle.vehicleNumber.toUpperCase() &&
+                                String(v.flatNumber).trim() !== String(flatNumber).trim()
+                            );
+                            if (foundMatch) {
+                                duplicateFound = subVehicle.vehicleNumber;
+                                break;
+                            }
+                        }
+
+                        if (duplicateFound) {
+                            showModal(`⚠️ Vehicle number <b>${duplicateFound}</b> is already registered under another flat in this society.`);
+                            submitBtn.disabled = false;
+                            submitBtn.innerText = "Submit Entry";
+                            return;
+                        }
+
+                        submitBtn.innerText = "Submitting...";
+
+                        const response = await fetch(`${API_BASE_URL}/vehicles`, {
+                            method: 'POST',
+                            headers,
+                            body: JSON.stringify({
+                                societyName,
+                                flatNumber,
+                                residentType,
+                                mobileNumber,
+                                deviceId,
+                                vehicles: vehiclesToSubmit
+                            })
+                        });
+
+                        if (response.ok) {
+                            showModal("✅ Vehicles registered successfully!");
+                            setTimeout(() => window.location.reload(), 1500);
+                        } else {
+                            const errData = await response.json();
+                            showModal(`❌ Error: ${errData.error || errData.message || 'Submission failed'}`);
+                            submitBtn.disabled = false;
+                            submitBtn.innerText = "Submit Entry";
+                        }
+                    } catch (err) {
+                        console.error("Submission error:", err);
+                        showModal("❌ Network error while submitting entry.");
+                        submitBtn.disabled = false;
+                        submitBtn.innerText = "Submit Entry";
+                    }
+                });
+            }
+        });
+    </script>
+    
+    <!-- Owl Interactive Effect Widget -->
+   <div id="owl-container">
+    <div id="owl-icon" onclick="activateOwlEffect()">
+        <img src="owl.png" alt="Owl Icon" style="width: 55px; height: 55px; object-fit: contain;">
+    </div>
+    <audio id="owl-audio" src="theme.mp3" preload="auto"></audio>
+</div>
+
+
+<style>
+  #owl-container { position: fixed; bottom: 30px; right: 30px; z-index: 9999; }
+  #owl-icon { font-size: 60px; cursor: pointer; user-select: none; transition: transform 0.3s ease; filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.2)); }
+  #owl-icon:hover { transform: scale(1.15); }
+  @keyframes enlargeAndShrinkTwice {
+    0% { transform: scale(1); }
+    25% { transform: scale(1.6); }
+    50% { transform: scale(1); }
+    75% { transform: scale(1.6); }
+    100% { transform: scale(1); }
+  }
+  .active-effect { animation: enlargeAndShrinkTwice 2s ease-in-out forwards; }
+</style>
+
+<script>
+  function activateOwlEffect() {
+    const container = document.getElementById('owl-container');
+    const audio = document.getElementById('owl-audio');
+    if (container.classList.contains('active-effect')) return;
+    audio.currentTime = 0;
+    audio.play().catch(error => {
+      console.log("Audio playback blocked or file not found:", error);
+    });
+    container.classList.add('active-effect');
+    setTimeout(() => {
+      container.classList.remove('active-effect');
+    }, 2000);
+  }
+</script>
+
+</body>
+</html>
